@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero text-center rounded-5 shadow-sm p-5 mb-5 bg-white">
+    <div class="py-5">
+        <h1 class="display-3 fw-bold">SmartGrader AI</h1>
+        <p class="lead text-muted mx-auto mb-5" style="max-width: 600px;">
+            The all-in-one platform for automated academic integrity. 
+            Scan handwritten assignments, detect plagiarism, and manage courses with ease.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg px-5 shadow">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg px-5">Login to Portal</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 text-center">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-4">
+            <div class="fs-1 mb-3">✍️</div>
+            <h4 class="fw-bold">Handwriting OCR</h4>
+            <p class="text-muted small">Our advanced AI converts handwritten images into digital text for analysis.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-4">
+            <div class="fs-1 mb-3">🔍</div>
+            <h4 class="fw-bold">Similarity Scan</h4>
+            <p class="text-muted small">Instant plagiarism detection against our global course database.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-4">
+            <div class="fs-1 mb-3">📊</div>
+            <h4 class="fw-bold">Faculty Portal</h4>
+            <p class="text-muted small">Detailed reports and course management tools for educators.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

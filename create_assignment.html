@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('course_page', course_id=course.id) }}">{{ course.code }}</a></li>
+                    <li class="breadcrumb-item active">New Assignment</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary-subtle p-3 rounded-circle me-3">
+                            <i class="bi bi-file-earmark-plus text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0">Create Assignment</h3>
+                            <p class="text-muted mb-0">Course: <span class="text-dark fw-semibold">{{ course.name }}</span></p>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Assignment Title</label>
+                            <input type="text" name="title" class="form-control form-control-lg" placeholder="e.g. Final Project Phase 1" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Detailed Instructions</label>
+                            <textarea name="instructions" class="form-control" rows="5" 
+                                      placeholder="Explain the requirements, grading criteria, or formatting rules..."></textarea>
+                            <div class="form-text">Students will see these instructions before they upload their work.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Question Papers / Resources</label>
+                            <div class="upload-zone p-4 border border-dashed rounded-3 text-center bg-light">
+                                <i class="bi bi-cloud-arrow-up fs-2 text-muted"></i>
+                                <input type="file" name="question_files" class="form-control mt-2" multiple>
+                                <div class="small text-muted mt-2">PDF, DOCX, ZIP, or Images (Multiple files allowed)</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-5">
+                            <div class="col-md-7">
+                                <label class="form-label fw-bold">Submission Deadline</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-calendar-event"></i></span>
+                                    <input type="datetime-local" name="deadline" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-bold">Attempt Limit</label>
+                                <select name="attempt_limit" class="form-select">
+                                    <option value="1">1 Attempt</option>
+                                    <option value="2">2 Attempts</option>
+                                    <option value="3" selected>3 Attempts</option>
+                                    <option value="5">5 Attempts</option>
+                                    <option value="999">Unlimited</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                                <i class="bi bi-megaphone me-2"></i>Publish to Students
+                            </button>
+                            <a href="{{ url_for('course_page', course_id=course.id) }}" class="btn btn-link text-muted">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-primary-subtle { background-color: rgba(13, 110, 253, 0.1); }
+    .border-dashed { border-style: dashed !important; border-width: 2px !important; border-color: #dee2e6 !important; }
+    .upload-zone:hover { border-color: #0d6efd !important; background-color: #f0f7ff !important; transition: 0.3s; }
+    .form-control:focus, .form-select:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); }
+    label { font-size: 0.9rem; color: #495057; }
+</style>
+{% endblock %}

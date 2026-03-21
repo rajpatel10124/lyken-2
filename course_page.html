@@ -1,0 +1,129 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">{{ course.code }}</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark">{{ course.name }}</h2>
+        </div>
+        <div class="d-flex gap-2">
+            {% if current_user.role == 'faculty' %}
+            <a href="{{ url_for('view_reports', course_id=course.id) }}" class="btn btn-outline-primary rounded-pill px-3">
+                <i class="bi bi-graph-up me-1"></i> Course Reports
+            </a>
+            {% endif %}
+            <span class="badge bg-primary-subtle text-primary border px-3 py-2 rounded-pill d-flex align-items-center">
+                {{ assignments|length }} Assignments
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for assign in assignments %}
+            {# Faculty see everything, students only see published #}
+            {% if assign.is_published or current_user.role == 'faculty' %}
+                {% set user_submissions = Submission.query.filter_by(user_id=current_user.id, assignment_id=assign.id).all() %}
+                {% set attempt_count = user_submissions|length %}
+
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm transition hover-up">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-0">{{ assign.title }}</h5>
+                                    {% if not assign.is_published %}
+                                        <span class="badge bg-warning text-dark small">Draft</span>
+                                    {% endif %}
+                                </div>
+                                <span class="badge {{ 'bg-danger-subtle text-danger' if now > assign.deadline else 'bg-success-subtle text-success' }} border">
+                                    {{ 'Closed' if now > assign.deadline else 'Active' }}
+                                </span>
+                            </div>
+
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-clock me-1"></i> Deadline: {{ assign.deadline.strftime('%d %b, %H:%M') }}
+                            </p>
+
+                            {% if current_user.role == 'faculty' %}
+                            <div class="alert alert-secondary py-2 border-0 rounded-3 mb-3 d-flex justify-content-between align-items-center">
+                                <small class="fw-bold text-uppercase" style="font-size: 0.7rem;">Faculty Controls</small>
+                                <div>
+                                    <a href="{{ url_for('edit_assignment', assignment_id=assign.id) }}" class="btn btn-sm btn-light border-secondary-subtle py-0 px-2 me-1">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if assign.question_file %}
+                            <div class="bg-light rounded p-3 mb-3 border-start border-primary border-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="pe-2">
+                                        <p class="mb-0 fw-bold small text-dark">Resources</p>
+                                        <small class="text-muted text-truncate d-block" style="max-width: 150px;">{{ assign.question_file }}</small>
+                                    </div>
+                                    <a href="{{ url_for('static', filename='uploads/' + assign.question_file) }}" 
+                                       class="btn btn-sm btn-primary rounded-pill px-3" download>
+                                        <i class="bi bi-download me-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if attempt_count > 0 %}
+                            <div class="mb-4">
+                                <p class="small fw-bold text-muted mb-2">Your History:</p>
+                                {% for sub in user_submissions %}
+                                <div class="p-2 mb-1 rounded-2 border {{ 'bg-danger-subtle border-danger-subtle' if sub.status == 'rejected' else 'bg-success-subtle border-success-subtle' }}" style="font-size: 0.8rem;">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold">Attempt {{ loop.index }}: {{ sub.status|upper }}</span>
+                                        <span>{{ (sub.score * 100)|int }}% Similarity</span>
+                                    </div>
+                                    {% if sub.status == 'rejected' and sub.reason %}
+                                        <div class="mt-1 text-dark italic"><i class="bi bi-exclamation-octagon me-1"></i>{{ sub.reason }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <div class="small">
+                                    <span class="text-muted">Attempts:</span> 
+                                    <span class="fw-bold">{{ attempt_count }} / {{ assign.attempt_limit }}</span>
+                                </div>
+
+                                {% if current_user.role == 'student' %}
+                                    {% if attempt_count >= assign.attempt_limit %}
+                                        <button class="btn btn-secondary btn-sm rounded-pill px-3" disabled>Max Attempts</button>
+                                    {% elif now > assign.deadline %}
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill px-3" disabled>Closed</button>
+                                    {% else %}
+                                        <a href="{{ url_for('submit', assignment_id=assign.id) }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">
+                                            {{ 'Re-submit' if attempt_count > 0 else 'Submit Now' }}
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="bg-white p-5 rounded border shadow-sm">
+                    <i class="bi bi-journal-x fs-1 text-muted"></i>
+                    <h5 class="mt-3 text-muted">No assignments published yet.</h5>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Reports</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Integrity Reports</h2>
+            <p class="text-muted"><i class="bi bi-book me-1"></i> {{ course.code }} | {{ course.name }}</p>
+        </div>
+        <div class="btn-group shadow-sm rounded-pill">
+            <a href="{{ url_for('create_assignment', course_id=course.id) }}" class="btn btn-primary px-3">
+                <i class="bi bi-plus-circle me-1"></i> New Task
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark px-3">
+                <i class="bi bi-house me-1"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body p-4">
+                    <h6 class="text-white-50">Total Submissions</h6>
+                    <h2 class="fw-bold mb-0">{{ total }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-danger text-white">
+                <div class="card-body p-4">
+                    <h6 class="text-white-50">Flagged (Rejected)</h6>
+                    <h2 class="fw-bold mb-0">{{ rejected }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-white">
+                <div class="card-body p-4 text-center">
+                    <h6 class="text-muted">Active Tasks</h6>
+                    <h2 class="fw-bold text-dark mb-0">{{ assignments|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="filterStudent" class="form-control border-start-0" placeholder="Search student name...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterStatus" class="form-select">
+                        <option value="all">All Statuses</option>
+                        <option value="accepted">Accepted Only</option>
+                        <option value="rejected">Rejected Only</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterAssignment" class="form-select">
+                        <option value="all">All Assignments</option>
+                        {% for assign in assignments %}
+                        <option value="{{ assign.title|lower }}">{{ assign.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-light w-100 border rounded-pill" onclick="resetFilters()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Student</th>
+                        <th>Assignment</th>
+                        <th>Similarity</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">File</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                    {% for assign in assignments %}
+                        {% for sub in assign.submissions %}
+                        <tr class="report-row" 
+                            data-name="{{ sub.author.username|lower }}" 
+                            data-status="{{ sub.status }}"
+                            data-assign="{{ assign.title|lower }}">
+                            <td class="ps-4">
+                                <span class="fw-bold d-block">{{ sub.author.username }}</span>
+                                <small class="text-muted">#{{ sub.author.id }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ assign.title }}</span>
+                            </td>
+                            <td>
+                                {% set score_val = (sub.score * 100)|round|int %}
+                                <div class="d-flex align-items-center" style="width: 150px;">
+                                    <small class="fw-bold me-2 {{ 'text-danger' if score_val > 30 else 'text-success' }}">{{ score_val }}%</small>
+                                    <div class="progress flex-grow-1" style="height: 5px;">
+                                        <div class="progress-bar {{ 'bg-danger' if score_val > 30 else 'bg-success' }}" style="width: {{ score_val }}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                                <td class="small">
+                                    <span class="badge {{ 'bg-success' if sub.status == 'accepted' else 'bg-danger' }}">
+                                        {{ sub.status|upper }}
+                                    </span>
+                                    <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                                        {{ sub.reason }} </div>
+                                </td>
+                            <td class="text-end pe-4">
+                                <a href="{{ url_for('static', filename='uploads/' + sub.filename) }}" class="btn btn-sm btn-outline-primary rounded-circle" download>
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const nameInp = document.getElementById('filterStudent');
+    const statInp = document.getElementById('filterStatus');
+    const assignInp = document.getElementById('filterAssignment');
+    const rows = document.querySelectorAll('.report-row');
+
+    function applyFilters() {
+        const nameVal = nameInp.value.toLowerCase().trim();
+        const statVal = statInp.value;
+        const assignVal = assignInp.value;
+
+        rows.forEach(row => {
+            const matchesName = row.dataset.name.includes(nameVal);
+            const matchesStatus = (statVal === 'all' || row.dataset.status === statVal);
+            const matchesAssign = (assignVal === 'all' || row.dataset.assign === assignVal);
+            
+            row.style.display = (matchesName && matchesStatus && matchesAssign) ? '' : 'none';
+        });
+    }
+
+    nameInp.addEventListener('input', applyFilters);
+    statInp.addEventListener('change', applyFilters);
+    assignInp.addEventListener('change', applyFilters);
+
+    function resetFilters() {
+        nameInp.value = '';
+        statInp.value = 'all';
+        assignInp.value = 'all';
+        applyFilters();
+    }
+</script>
+
+<style>
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.1); }
+    .table thead th { font-weight: 600; text-transform: uppercase; font-size: 0.75rem; color: #6c757d; }
+    .progress { background-color: #e9ecef; }
+</style>
+{% endblock %}

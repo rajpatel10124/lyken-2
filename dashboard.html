@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-7">
+            <h2 class="fw-bold text-dark">Welcome back, {{ current_user.username }}!</h2>
+            <p class="text-muted">
+                You are logged in as 
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">
+                    {{ current_user.role|upper }}
+                </span>
+            </p>
+        </div>
+        <div class="col-md-5 text-md-end">
+            {% if current_user.role == 'faculty' %}
+                <a href="{{ url_for('create_course') }}" class="btn btn-primary btn-lg px-4 shadow-sm rounded-pill transition">
+                    <i class="bi bi-plus-lg me-2"></i>New Course
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if current_user.role == 'student' %}
+    <div class="card border-0 shadow-sm mb-5 bg-primary text-white p-4 overflow-visible">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h4 class="fw-bold mb-2"><i class="bi bi-search me-2"></i>Explore Courses</h4>
+                <p class="text-white-50 small mb-3">Join a new classroom by searching for course codes or professors.</p>
+                <div class="position-relative">
+                    <input type="text" id="masterSearch" class="form-control form-control-lg border-0 shadow-sm" 
+                           placeholder="Type 'CS101' or 'Dr. Smith'..." autocomplete="off">
+                    
+                    <div id="suggestionBox" class="list-group position-absolute w-100 shadow-lg mt-1 d-none" 
+                         style="z-index: 2000; border-radius: 12px; max-height: 350px; overflow-y: auto;">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block text-center">
+                <i class="bi bi-mortarboard" style="font-size: 5rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <h4 class="fw-bold mb-0">My Active Classrooms</h4>
+        <span class="text-muted small">{{ courses|length }} Courses</span>
+    </div>
+
+    <div class="row g-4">
+        {% for course in courses %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm hover-up transition">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-light text-primary border px-2 py-1">{{ course.code }}</span>
+                        <div class="dropdown">
+                            <i class="bi bi-three-dots-vertical text-muted cursor-pointer" data-bs-toggle="dropdown"></i>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <li><a class="dropdown-item small" href="#"><i class="bi bi-info-circle me-2"></i>Course Info</a></li>
+                                {% if current_user.role == 'faculty' %}
+                                <li><a class="dropdown-item small text-danger" href="#"><i class="bi bi-archive me-2"></i>Archive</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-1 text-truncate">{{ course.name }}</h5>
+                    <p class="text-muted small mb-4">
+                        <i class="bi bi-person-badge me-1"></i> {{ course.faculty.username }}
+                    </p>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <div class="bg-light rounded p-2 text-center border">
+                                <small class="text-muted d-block x-small uppercase">Tasks</small>
+                                <span class="fw-bold text-dark">{{ course.assignments|length }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light rounded p-2 text-center border">
+                                {% if current_user.role == 'faculty' %}
+                                    <small class="text-muted d-block x-small uppercase">Enrolled</small>
+                                    <span class="fw-bold text-dark">
+                                        {{ course.students.count() if course.students.count else course.students|length }}
+                                    </span>
+                                {% else %}
+                                    <small class="text-muted d-block x-small uppercase">Status</small>
+                                    <span class="text-success fw-bold x-small">Active</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {% if current_user.role == 'faculty' %}
+                            <a href="{{ url_for('create_assignment', course_id=course.id) }}" class="btn btn-primary rounded-pill btn-sm">
+                                <i class="bi bi-plus-circle me-1"></i> New Assignment
+                            </a>
+                            <a href="{{ url_for('view_reports', course_id=course.id) }}" class="btn btn-outline-dark rounded-pill btn-sm">
+                                <i class="bi bi-bar-chart-line me-1"></i> Integrity Reports
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('course_page', course_id=course.id) }}" class="btn btn-primary rounded-pill">
+                                Enter Classroom <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="bg-white p-5 rounded-4 border border-dashed shadow-sm">
+                <div class="display-1 text-light mb-3"><i class="bi bi-journal-x"></i></div>
+                <h4 class="text-muted">No courses yet</h4>
+                <p class="text-muted mb-4">You haven't added or joined any courses yet.</p>
+                {% if current_user.role == 'faculty' %}
+                    <a href="{{ url_for('create_course') }}" class="btn btn-primary rounded-pill px-4">Create Your First Course</a>
+                {% else %}
+                    <p class="small text-primary">Use the search bar above to find your first course!</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+// Pass already enrolled IDs to JS to prevent double enrollment
+const ENROLLED_IDS = [{% for c in courses %}{{ c.id }},{% endfor %}];
+
+const DATA = [
+    {% if all_available_courses %}
+        {% for c in all_available_courses %}
+        { id: {{ c.id }}, name: "{{ c.name }}", code: "{{ c.code }}", prof: "{{ c.faculty.username }}" },
+        {% endfor %}
+    {% endif %}
+];
+
+const input = document.getElementById('masterSearch');
+const box = document.getElementById('suggestionBox');
+
+if (input) {
+    input.addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase().trim();
+        box.innerHTML = '';
+        
+        if (val.length < 1) {
+            box.classList.add('d-none');
+            return;
+        }
+
+        const matches = DATA.filter(c => 
+            c.name.toLowerCase().includes(val) || 
+            c.code.toLowerCase().includes(val) || 
+            c.prof.toLowerCase().includes(val)
+        );
+
+        if (matches.length > 0) {
+            box.classList.remove('d-none');
+            matches.forEach(c => {
+                const isEnrolled = ENROLLED_IDS.includes(c.id);
+                const row = document.createElement('div');
+                row.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3 border-start-0 border-end-0';
+                row.innerHTML = `
+                    <div>
+                        <span class="fw-bold d-block text-dark">${c.name}</span>
+                        <small class="text-muted">${c.code} • ${c.prof}</small>
+                    </div>
+                    ${isEnrolled 
+                        ? '<span class="badge bg-success-subtle text-success rounded-pill px-3">Enrolled</span>' 
+                        : `<button class="btn btn-sm btn-primary rounded-pill px-3" onclick="enroll(${c.id}, '${c.name}')">Join</button>`
+                    }
+                `;
+                box.appendChild(row);
+            });
+        } else {
+            box.classList.add('d-none');
+        }
+    });
+
+    // Close box when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !box.contains(e.target)) {
+            box.classList.add('d-none');
+        }
+    });
+}
+
+function enroll(id, name) {
+    if (confirm(`Join course: ${name}?`)) {
+        window.location.href = `/enroll/${id}`;
+    }
+}
+</script>
+
+<style>
+    .hover-up:hover { transform: translateY(-8px); box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important; }
+    .transition { transition: all 0.3s ease; }
+    .x-small { font-size: 0.65rem; }
+    .uppercase { text-transform: uppercase; letter-spacing: 1px; }
+    .cursor-pointer { cursor: pointer; }
+    .bg-primary-subtle { background-color: rgba(13, 110, 253, 0.1); }
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1); }
+</style>
+{% endblock %}

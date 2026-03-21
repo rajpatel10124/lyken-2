@@ -1,0 +1,27 @@
+:root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --dark: #1e293b;
+    --bg: #f8fafc;
+}
+
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--dark); }
+
+.navbar { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+.card { 
+    border: none; border-radius: 12px; 
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+    transition: all 0.3s ease;
+}
+
+.card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+
+.btn-primary { background: var(--primary); border: none; font-weight: 600; border-radius: 8px; }
+.btn-primary:hover { background: var(--primary-hover); }
+
+.badge-role { font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+.bg-indigo-subtle { background-color: #eef2ff; color: #4f46e5; }
+.bg-success-subtle { background-color: #f0fdf4; color: #16a34a; }
+.bg-danger-subtle { background-color: #fef2f2; color: #dc2626; }
+.text-indigo { color: #4f46e5; }

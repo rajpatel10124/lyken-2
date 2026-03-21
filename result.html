@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <div class="card p-5">
+            <h2 class="fw-bold {% if status == 'accepted' %}text-success{% else %}text-danger{% endif %}">
+                {{ status|upper }}
+            </h2>
+            <div class="display-1 fw-bold my-4">{{ (score * 100)|round(1) }}%</div>
+            <p class="text-muted">Similarity Score Detected</p>
+            {% if matched %}
+            <div class="alert alert-danger">Matched work by: <b>{{ matched }}</b></div>
+            {% endif %}
+            <hr>
+            <a href="/dashboard" class="btn btn-dark">Back to My Courses</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

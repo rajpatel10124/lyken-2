@@ -1,0 +1,93 @@
+<!-- {% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">{{ course.code }}</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark">{{ course.name }}</h2>
+        </div>
+        <span class="badge bg-primary-subtle text-primary border px-3 py-2 rounded-pill">
+            {{ assignments|length }} Assignments Total
+        </span>
+    </div>
+
+    <div class="row g-4">
+        {% for assign in assignments %}
+            {% if assign.is_published %}
+                {# Get all submissions by this user for this specific assignment #}
+                {% set user_submissions = Submission.query.filter_by(user_id=current_user.id, assignment_id=assign.id).all() %}
+                {% set attempt_count = user_submissions|length %}
+
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm transition hover-up">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="fw-bold text-dark mb-0">{{ assign.title }}</h5>
+                                <span class="badge {{ 'bg-danger-subtle text-danger' if now > assign.deadline else 'bg-success-subtle text-success' }} border">
+                                    {{ 'Closed' if now > assign.deadline else 'Active' }}
+                                </span>
+                            </div>
+
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-clock me-1"></i> Deadline: {{ assign.deadline.strftime('%d %b, %H:%M') }}
+                            </p>
+
+                            {% if assign.question_file %}
+                            <div class="bg-light rounded p-3 mb-4 border-start border-primary border-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="mb-0 fw-bold small text-dark">Question Paper & Resources</p>
+                                        <small class="text-muted">Download materials before starting</small>
+                                    </div>
+                                    <a href="{{ url_for('static', filename='uploads/' + assign.question_file) }}" 
+                                       class="btn btn-sm btn-primary rounded-pill px-3" download>
+                                        <i class="bi bi-download me-1"></i> Download
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <div class="small">
+                                    <span class="text-muted">Attempts:</span> 
+                                    <span class="fw-bold">{{ attempt_count }} / {{ assign.attempt_limit }}</span>
+                                </div>
+
+                                {% if attempt_count >= assign.attempt_limit %}
+                                    <button class="btn btn-secondary btn-sm rounded-pill px-3" disabled>Attempts Exhausted</button>
+                                {% elif now > assign.deadline %}
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3" disabled>Deadline Passed</button>
+                                {% else %}
+                                    <a href="{{ url_for('submit', assignment_id=assign.id) }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">
+                                        {{ 'Re-submit' if attempt_count > 0 else 'Submit Now' }}
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="bg-white p-5 rounded border shadow-sm">
+                    <i class="bi bi-journal-x fs-1 text-muted"></i>
+                    <h5 class="mt-3 text-muted">No assignments published yet.</h5>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .hover-up:hover { transform: translateY(-5px); transition: all 0.3s ease; }
+    .bg-primary-subtle { background-color: rgba(13, 110, 253, 0.1); }
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-danger-subtle { background-color: rgba(220, 53, 69, 0.1); }
+</style>
+{% endblock %} -->
